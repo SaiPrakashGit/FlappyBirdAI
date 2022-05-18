@@ -3,7 +3,7 @@
 
 import pygame
 import os
-import time
+import random
 
 # Initializing font inside game window
 pygame.font.init()
@@ -14,6 +14,7 @@ END_FONT = pygame.font.SysFont("comicsans", 70)
 # Parameters to create the game window
 WIN_WIDTH = 288
 WIN_HEIGHT = 512
+FLOOR = 450
 WIN = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 pygame.display.set_caption("Flappy Bird")
 FPS = 30
@@ -94,7 +95,81 @@ class Bird:
     # Function for pixel perfect collision between pipes and bird   
     def get_mask(self):
         return pygame.mask.from_surface(self.img)
+
+# Creating the Pipe Class
+class Pipe:
+    GAP = 100   #? Gap between the two pipes
+    VEL = -5     # Velocity at which the pipe should be moved towards the bird
+    
+    def __init__(self, x):
+        self.x = x
+        self.height = 0
         
+        self.top = 0        # Co-ordinates for the TOP PIPE
+        self.bottom = 0     # Co-ordinates for the BOTTOM PIPE
+        self.PIPE_BOTTOM = PIPE_IMAGE
+        self.PIPE_TOP = pygame.transform.flip(PIPE_IMAGE, False, True)  # Flips the pipe image to get the top pipe
+        
+        self.passed = False
+        self.set_height()   # Create the gaps in the pipe randomly with helper function
+        
+    def set_height(self):
+        self.height = random.randrange(30, 300) #?
+        self.top = self.height - self.PIPE_TOP.get_height()     # TP CO-ordinates
+        self.bottom = self.height + self.GAP                    # BP CO-ordinates
+        
+    def move(self):
+        self.x += self.VEL
+        
+    def draw(self, win):
+        win.blit(self.PIPE_TOP, (self.x, self.top))
+        win.blit(self.PIPE_BOTTOM, (self.x, self.bottom))
+        
+    # Pixel Perfect Collision between pipe edges and Bird using the masks concept where the actual pixels are
+    def collide(self, bird):
+        bird_mask = bird.get_mask()
+        top_mask = pygame.mask.from_surface(self.PIPE_TOP)
+        bottom_mask = pygame.mask.from_surface(self.PIPE_BOTTOM)
+        
+        top_offset = (self.x - bird.x, self.top - round(bird.y))
+        bottom_offset = (self.x - bird.x, self.bottom - round(bird.y))
+        
+        bottom_collision = bird_mask.overlap(bottom_mask, bottom_offset)
+        top_collision = bird_mask.overlap(top_mask, top_offset)
+        
+        # Checks for collision and returns true if there is collision
+        if top_collision or bottom_collision:
+            return True
+        return False
+        
+
+# Creating the Base Class        
+class Base:
+    VEL = -5        # Same as that of the pipe
+    WIDTH = BASE_IMAGE.get_width()
+    IMG = BASE_IMAGE
+    
+    def __init__(self, y):
+        self.y = y
+        self.x1 = 0
+        self.x2 = self.WIDTH
+        
+    def move(self):
+        self.x1 += self.VEL
+        self.x2 += self.VEL
+        
+        # If a picture has completed the rotation, get it back to the second picture's back
+        if self.x1 + self.WIDTH < 0:
+            self.x1 = self.x2 + self.WIDTH
+
+        if self.x2 + self.WIDTH < 0:
+            self.x2 = self.x1 + self.WIDTH
+            
+    def draw(self, win):
+        win.blit(self.IMG, (self.x1, self.y))
+        win.blit(self.IMG, (self.x2, self.y))
+        
+             
 
 # Rotate the image with the recieved parameters
 def blitRotateCenter(surf, image, topleft, angle):
@@ -103,13 +178,22 @@ def blitRotateCenter(surf, image, topleft, angle):
     
     surf.blit(rotated_image, new_rect.topleft)
 
-def draw_window(win, bird):         # blit simply means draw as a pygame function
+def draw_window(win, bird, pipes, base):         # blit simply means draw as a pygame function
     win.blit(BG_IMAGE, (0,0))
+    
+    for pipe in pipes:
+        pipe.draw(win)
+        
+    base.draw(win)
+    
     bird.draw(win)
     pygame.display.update()
     
 def main():
+    score = 0
     bird = Bird(50,200)
+    base = Base(FLOOR)
+    pipes = [Pipe(300)]
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     clock = pygame.time.Clock()
     
@@ -119,7 +203,34 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        draw_window(win, bird)
+        #bird.move()
+        add_pipe = False
+        remove_pipes = []
+        # Move pipes
+        for pipe in pipes:
+            if pipe.collide(bird):
+                pass
+            
+            if pipe.x + pipe.PIPE_TOP.get_width() < 0:
+                remove_pipes.append(pipe)
+            
+            if not pipe.passed and pipe.x < bird.x:
+                pipe.passed = True
+                add_pipe = True
+                
+            pipe.move()
+            
+        if add_pipe:
+            score += 1
+            pipes.append(Pipe(300))
+            
+        for r in remove_pipes:
+            pipes.remove(r)
+            
+        # Move Base
+        base.move()
+        
+        draw_window(win, bird, pipes, base)
         
     pygame.quit()
     quit()
