@@ -48,7 +48,7 @@ class Bird:
         self.img = self.IMAGES[0]
         
     def jump(self):
-        self.vel = -5.5    # Positive directions are towards right and down from top-left corner
+        self.vel = -7.0    # Positive directions are towards right and down from top-left corner
         self.tick_count = 0
         self.height = self.y
         
@@ -195,7 +195,7 @@ def draw_window(win, birds, pipes, base, score, gen):         # blit simply mean
     Gen = STAT_FONT.render("Gen: " + str(gen), 1, (255,255,255))
     win.blit(Gen, (8, 5))
     
-    Alive = STAT_FONT.render("Alive: " + str(len(birds)) + "/" + str(10), 1, (255,255,255))
+    Alive = STAT_FONT.render("Alive: " + str(len(birds)) + "/" + str(30), 1, (255,255,255))
     win.blit(Alive, (8, 30))
         
     base.draw(win)
