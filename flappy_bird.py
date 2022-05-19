@@ -3,6 +3,7 @@
 
 import pygame
 import os
+import neat
 import random
 
 # Initializing font inside game window to draw useful info like score and how many birds are alive at each generation
@@ -45,7 +46,7 @@ class Bird:
         self.img = self.IMAGES[0]
         
     def jump(self):
-        self.vel = -10.5    # Positive directions are towards right and down from top-left corner
+        self.vel = -5.5    # Positive directions are towards right and down from top-left corner
         self.tick_count = 0
         self.height = self.y
         
@@ -180,7 +181,7 @@ def blitRotateCenter(surf, image, topleft, angle):
     
     surf.blit(rotated_image, new_rect.topleft)
 
-def draw_window(win, bird, pipes, base, score):         # blit simply means draw as a pygame function
+def draw_window(win, birds, pipes, base, score):         # blit simply means draw as a pygame function
     win.blit(BG_IMAGE, (0,0))
     
     for pipe in pipes:
@@ -190,13 +191,28 @@ def draw_window(win, bird, pipes, base, score):         # blit simply means draw
     win.blit(text, (WIN_WIDTH - 5 - text.get_width(), 5))
         
     base.draw(win)
-    
-    bird.draw(win)
+    for bird in birds:
+        bird.draw(win)
+        
     pygame.display.update()
     
-def main():
+def main(genomes, config):
+    
+    # Code to make neural networks control the movement of the birds in the game
+    
+    networks = []
+    ge = []
+    birds = []
+    
+    for _, g in genomes:            # Genome is actually a tuple (1, Genome object)
+        network = neat.nn.FeedForwardNetwork.create(g, config)
+        networks.append(network)
+        birds.append(Bird(50, 200))
+        g.fitness = 0
+        ge.append(g)
+        
+    
     score = 0
-    bird = Bird(50,200)
     base = Base(FLOOR)
     pipes = [Pipe(400)]
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
@@ -208,40 +224,94 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        #bird.move()
+                pygame.quit()
+                quit()
+                
+        # Figuring out which pipe to look at as there would be more than 1 pipe on the screen
+        pipe_index = 0
+        if len(birds) > 0:  # if there are 2 pipes on the screen and the birds have crossed the 1st, look at 2nd pipe
+            if len(pipes) > 1 and birds[0].x > pipes[0].x + pipes[0].PIPE_TOP.get_width():
+                pipe_index = 1
+        else:
+            run = False
+            break
+                
+        # Make the birds' nns' move them
+        for x, bird in enumerate(birds):
+            bird.move()
+            ge[x].fitness += 0.1        # We are increasing the fitness of the birds for every frame they stay alive
+                                        # In that way, we encourage the bird to stay alive for long
+            
+            # Get the outputs for the birds from their neural networks (Give the output neurons list)
+            output = networks[birds.index(bird)].activate((bird.y, abs(bird.y - pipes[pipe_index].height), abs(bird.y - pipes[pipe_index].bottom)))
+            
+            # Output value between -1 and 1 ("tanh" activation function)
+            if output[0] > 0.5:
+                bird.jump()
+            
+        
+        
+        
         add_pipe = False
         remove_pipes = []
         
         # Move pipes
         for pipe in pipes:
-            if pipe.collide(bird):      # Modify later
-                pass
+            for x, bird in enumerate(birds):
+                if pipe.collide(bird):      # If bird collides, get rid of it and store the fitness
+                    ge[x].fitness -= 1      # This way, we favour the birds that didn't collide with the pipe which have gone the same distance
+                    birds.pop(x)
+                    networks.pop(x)
+                    ge.pop(x)
+                
+                if not pipe.passed and pipe.x < bird.x:
+                    pipe.passed = True
+                    add_pipe = True
             
             if pipe.x + pipe.PIPE_TOP.get_width() < 0:
-                remove_pipes.append(pipe)
+                    remove_pipes.append(pipe)
             
-            if not pipe.passed and pipe.x < bird.x:
-                pipe.passed = True
-                add_pipe = True
                 
             pipe.move()
             
         if add_pipe:
             score += 1
+            for g in ge:            # Increase the genome's fitness significantly more if they cross the pipe
+                g.fitness += 5
             pipes.append(Pipe(300))
             
         for r in remove_pipes:
             pipes.remove(r)
         
-        if bird.y + bird.img.get_height() >= FLOOR:
-            pass                                        # Modify
+        for x, bird in enumerate(birds):
+            if bird.y + bird.img.get_height() >= FLOOR or bird.y < 0:
+                birds.pop(x)
+                networks.pop(x)                 # Get rid of birds that hit the floor and that go above the pipes and survive back to the frame
+                ge.pop(x)
         
         # Move Base
         base.move()
         
-        draw_window(win, bird, pipes, base, score)
+        draw_window(win, birds, pipes, base, score)
         
-    pygame.quit()
-    quit()
+
+
+# Run the configuration file
+def run(config_path):
+    config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet, neat.DefaultStagnation, config_path)
     
-main()
+    population = neat.Population(config)
+    
+    population.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    population.add_reporter(stats)
+    
+    winner = population.run(main, 50)
+
+
+# Load the COnfiguration file in the current folder to the program to train the AI
+if __name__ == "__main__":
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, "config-feedforward.txt")
+    run(config_path)
+    
