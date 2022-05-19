@@ -5,10 +5,10 @@ import pygame
 import os
 import random
 
-# Initializing font inside game window
+# Initializing font inside game window to draw useful info like score and how many birds are alive at each generation
 pygame.font.init()
-STAT_FONT = pygame.font.SysFont("comicsans", 50)
-END_FONT = pygame.font.SysFont("comicsans", 70)
+STAT_FONT = pygame.font.SysFont("comicsans", 20)
+END_FONT = pygame.font.SysFont("comicsans", 30)
 
 
 # Parameters to create the game window
@@ -158,18 +158,20 @@ class Base:
         self.x1 += self.VEL
         self.x2 += self.VEL
         
-        # If a picture has completed the rotation, get it back to the second picture's back
+        
+        # If a picture has completed the rotation, get it back to the third picture's back
         if self.x1 + self.WIDTH < 0:
             self.x1 = self.x2 + self.WIDTH
 
         if self.x2 + self.WIDTH < 0:
             self.x2 = self.x1 + self.WIDTH
             
+            
     def draw(self, win):
         win.blit(self.IMG, (self.x1, self.y))
         win.blit(self.IMG, (self.x2, self.y))
         
-             
+        
 
 # Rotate the image with the recieved parameters
 def blitRotateCenter(surf, image, topleft, angle):
@@ -178,11 +180,14 @@ def blitRotateCenter(surf, image, topleft, angle):
     
     surf.blit(rotated_image, new_rect.topleft)
 
-def draw_window(win, bird, pipes, base):         # blit simply means draw as a pygame function
+def draw_window(win, bird, pipes, base, score):         # blit simply means draw as a pygame function
     win.blit(BG_IMAGE, (0,0))
     
     for pipe in pipes:
         pipe.draw(win)
+    
+    text = STAT_FONT.render("Score: " + str(score), 1, (255,255,255))
+    win.blit(text, (WIN_WIDTH - 5 - text.get_width(), 5))
         
     base.draw(win)
     
@@ -193,7 +198,7 @@ def main():
     score = 0
     bird = Bird(50,200)
     base = Base(FLOOR)
-    pipes = [Pipe(300)]
+    pipes = [Pipe(400)]
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     clock = pygame.time.Clock()
     
@@ -206,9 +211,10 @@ def main():
         #bird.move()
         add_pipe = False
         remove_pipes = []
+        
         # Move pipes
         for pipe in pipes:
-            if pipe.collide(bird):
+            if pipe.collide(bird):      # Modify later
                 pass
             
             if pipe.x + pipe.PIPE_TOP.get_width() < 0:
@@ -226,11 +232,14 @@ def main():
             
         for r in remove_pipes:
             pipes.remove(r)
-            
+        
+        if bird.y + bird.img.get_height() >= FLOOR:
+            pass                                        # Modify
+        
         # Move Base
         base.move()
         
-        draw_window(win, bird, pipes, base)
+        draw_window(win, bird, pipes, base, score)
         
     pygame.quit()
     quit()
