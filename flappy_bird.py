@@ -6,6 +6,8 @@ import os
 import neat
 import random
 
+GEN = -1
+
 # Initializing font inside game window to draw useful info like score and how many birds are alive at each generation
 pygame.font.init()
 STAT_FONT = pygame.font.SysFont("comicsans", 20)
@@ -181,14 +183,20 @@ def blitRotateCenter(surf, image, topleft, angle):
     
     surf.blit(rotated_image, new_rect.topleft)
 
-def draw_window(win, birds, pipes, base, score):         # blit simply means draw as a pygame function
+def draw_window(win, birds, pipes, base, score, gen):         # blit simply means draw as a pygame function
     win.blit(BG_IMAGE, (0,0))
     
     for pipe in pipes:
         pipe.draw(win)
     
     text = STAT_FONT.render("Score: " + str(score), 1, (255,255,255))
-    win.blit(text, (WIN_WIDTH - 5 - text.get_width(), 5))
+    win.blit(text, (WIN_WIDTH - 8 - text.get_width(), 5))
+    
+    Gen = STAT_FONT.render("Gen: " + str(gen), 1, (255,255,255))
+    win.blit(Gen, (8, 5))
+    
+    Alive = STAT_FONT.render("Alive: " + str(len(birds)) + "/" + str(10), 1, (255,255,255))
+    win.blit(Alive, (8, 30))
         
     base.draw(win)
     for bird in birds:
@@ -197,6 +205,9 @@ def draw_window(win, birds, pipes, base, score):         # blit simply means dra
     pygame.display.update()
     
 def main(genomes, config):
+    
+    global GEN
+    GEN += 1
     
     # Code to make neural networks control the movement of the birds in the game
     
@@ -249,9 +260,7 @@ def main(genomes, config):
             if output[0] > 0.5:
                 bird.jump()
             
-        
-        
-        
+    
         add_pipe = False
         remove_pipes = []
         
@@ -292,7 +301,7 @@ def main(genomes, config):
         # Move Base
         base.move()
         
-        draw_window(win, birds, pipes, base, score)
+        draw_window(win, birds, pipes, base, score, GEN)
         
 
 
@@ -309,7 +318,7 @@ def run(config_path):
     winner = population.run(main, 50)
 
 
-# Load the COnfiguration file in the current folder to the program to train the AI
+# Load the Configuration file in the current folder to the program to train the AI
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, "config-feedforward.txt")
