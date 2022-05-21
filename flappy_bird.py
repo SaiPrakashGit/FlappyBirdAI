@@ -5,6 +5,7 @@ import pygame
 import os
 import neat
 import random
+import pickle           # To store the best performed AI bird into file to store it in order to use it later to play the game
 
 GEN = -1
 
@@ -303,6 +304,13 @@ def main(genomes, config):
         
         draw_window(win, birds, pipes, base, score, GEN)
         
+        # If score gets significantly higher, it means the AI bird is performing very well and we need to store it in a file
+        # Even if there are more than 1 bird performing better, we store the network corresponding to the first bird in list
+        if score > 100:
+            print("Storing the best bird's neural network to the pickle file... \n")
+            pickle.dump(networks[0], open("best_bird.pickle", "wb"))
+            break
+        
 
 
 # Run the configuration file
@@ -316,6 +324,10 @@ def run(config_path):
     population.add_reporter(stats)
     
     winner = population.run(main, 50)
+    
+    # Print the statistics of the winner
+    print('\nBest genome:\n{!s}'.format(winner))
+    
 
 
 # Load the Configuration file in the current folder to the program to train the AI
