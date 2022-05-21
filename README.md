@@ -1,5 +1,6 @@
 # FlappyBirdAI
-This project is a wonderful application of the ***Genetic Algorithm*** which is a topic in my 3rd year Bachelor's in Technology course **Optimization Methods in Engineering**.
+This project is a wonderful application of the ***Genetic Algorithm*** which is a topic in 3rd year course **Optimization Methods in Engineering** of my B.Tech programme.
+
 
 ## Description
 Created a basic functional Flappy Bird Game and trained the AI birds using the ***Genetic Algorithm*** from **NEAT (NeuroEvolution of Augmenting Topologies)** Framework.
