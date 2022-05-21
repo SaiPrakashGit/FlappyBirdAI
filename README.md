@@ -17,7 +17,9 @@ The best evolved AI bird after training can then be stored and used to play the 
 3. Use the best evolved and stored AI bird to play the game
 
 ## Training the AI Birds
-Take a look at the video below to see how the birds are being trained using the built-in Genetic Algorithm in NEAT Framework.
+Take a look at the video below to see how the birds are being trained using the built-in Genetic Algorithm in NEAT Framework
+*https://www.youtube.com/watch?v=azMAmb5jB9U&list=PL2-kFUJJfnYCEXIVPzlZN53putIU-oVP2&index=1*
 
 ## AI playing the game
-Now, take a look at the best evolved AI bird playing the game all by itself perfectly.
+Now, take a look at the best evolved AI bird playing the game all by itself perfectly
+*https://www.youtube.com/watch?v=NecLPV8-MXU&list=PL2-kFUJJfnYCEXIVPzlZN53putIU-oVP2&index=2*
