@@ -1,13 +1,14 @@
 # Using the Object Oriented Procedure to create the objects in the game window such as bird, background, pipes, base..
-# Using the installed pygame module
+# Using the installed pygame & neat modules
 
 import pygame
 import os
 import neat
 import random
-import pickle           # To store the best performed AI bird into file to store it in order to use it later to play the game
+import pickle     # To store the best performed AI bird into file to store it in order to use it later to play the game
 
 GEN = -1
+training = False
 
 # Initializing font inside game window to draw useful info like score and how many birds are alive at each generation
 pygame.font.init()
@@ -20,8 +21,12 @@ WIN_WIDTH = 288
 WIN_HEIGHT = 512
 FLOOR = 450
 WIN = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-pygame.display.set_caption("Flappy Bird")
 FPS = 30
+
+if training:
+    pygame.display.set_caption("Flappy Bird Training")
+else:
+    pygame.display.set_caption("Flappy Bird AI")
 
 # Loading the images into the game window
 BIRD_IMAGES = [ pygame.image.load(os.path.join("images", "bird1.png")),
@@ -193,15 +198,22 @@ def draw_window(win, birds, pipes, base, score, gen):         # blit simply mean
     text = STAT_FONT.render("Score: " + str(score), 1, (255,255,255))
     win.blit(text, (WIN_WIDTH - 8 - text.get_width(), 5))
     
-    Gen = STAT_FONT.render("Gen: " + str(gen), 1, (255,255,255))
-    win.blit(Gen, (8, 5))
     
-    Alive = STAT_FONT.render("Alive: " + str(len(birds)) + "/" + str(30), 1, (255,255,255))
-    win.blit(Alive, (8, 30))
+    # If the birds are training
+    if training:
+        Gen = STAT_FONT.render("Gen: " + str(gen), 1, (255,255,255))
+        win.blit(Gen, (8, 5))
+    
+        Alive = STAT_FONT.render("Alive: " + str(len(birds)) + "/" + str(30), 1, (255,255,255))
+        win.blit(Alive, (8, 30))
         
     base.draw(win)
-    for bird in birds:
-        bird.draw(win)
+    
+    if training:    # While training, more birds are present
+        for bird in birds:
+            bird.draw(win)
+    else:
+        birds.draw(win)
         
     pygame.display.update()
     
@@ -330,9 +342,90 @@ def run(config_path):
     
 
 
+# Play the game with the stored and best performed AI bird
+def play_game(best_network):
+    
+    network = best_network
+    bird = Bird(50, 200)
+
+    score = 0
+    base = Base(FLOOR)
+    pipes = [Pipe(400)]
+    win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+    clock = pygame.time.Clock()
+
+    run = True
+    while run:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+                pygame.quit()
+                quit()
+                
+        # Figuring out which pipe to look at as there would be more than 1 pipe on the screen
+        pipe_index = 0
+        if len(pipes) > 1 and bird.x > pipes[0].x + pipes[0].PIPE_TOP.get_width():
+            pipe_index = 1
+                
+        # Make the bird move
+        bird.move()
+            
+        # Get the output for the bird from it's neural network
+        output = network.activate((bird.y, abs(bird.y - pipes[pipe_index].height), abs(bird.y - pipes[pipe_index].bottom)))
+            
+        # Output value between -1 and 1 ("tanh" activation function)
+        if output[0] > 0.5:
+            bird.jump()
+            
+        add_pipe = False
+        remove_pipes = []
+        
+        # Move pipes
+        for pipe in pipes:
+            if pipe.collide(bird):      # If AI bird collides, Quit the game
+                run = False
+                pygame.quit()
+                quit()
+                
+            if not pipe.passed and pipe.x < bird.x:
+                pipe.passed = True
+                add_pipe = True
+            
+            if pipe.x + pipe.PIPE_TOP.get_width() < 0:
+                remove_pipes.append(pipe)
+            
+            # Move every pipe        
+            pipe.move()
+            
+        if add_pipe:
+            score += 1
+            pipes.append(Pipe(300))
+            
+        for r in remove_pipes:
+            pipes.remove(r)
+        
+        if bird.y + bird.img.get_height() >= FLOOR or bird.y < 0:
+            run = False
+            pygame.quit()
+            quit()
+        
+        # Move Base
+        base.move()
+        
+        draw_window(win, bird, pipes, base, score, GEN)
+
+
 # Load the Configuration file in the current folder to the program to train the AI
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
-    config_path = os.path.join(local_dir, "config-feedforward.txt")
-    run(config_path)
+    
+    # These lines of code are used to train the birds
+    if training:
+        config_path = os.path.join(local_dir, "config-feedforward.txt")
+        run(config_path)
+    # These lines are used to use the best trained neural network to play the game
+    else:
+        best_network = pickle.load(open("best_bird.pickle", "rb"))
+        play_game(best_network)
     
