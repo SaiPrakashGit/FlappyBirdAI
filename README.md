@@ -20,7 +20,7 @@ The best evolved AI bird after training can then be stored and used to play the 
 ## Training the AI Birds
 Take a look at the video below to see how the birds are being trained over generations using the built-in Genetic Algorithm in NEAT Framework.<br/>
 
-![Training the Birds](https://user-images.githubusercontent.com/75234723/169683424-ffd7a329-0870-4328-8289-30d56f5b426d.mp4)
+<video src="https://user-images.githubusercontent.com/75234723/169683424-ffd7a329-0870-4328-8289-30d56f5b426d.mp4">
 <br/>
 
 
