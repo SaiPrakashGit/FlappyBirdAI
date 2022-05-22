@@ -18,16 +18,16 @@ The best evolved AI bird after training can then be stored and used to play the 
 3. Use the best evolved and stored AI bird to play the game
 
 ## Training the AI Birds
-Take a look at the video at the end of this README file to see how the birds are being trained over generations using the built-in Genetic Algorithm in NEAT Framework.<br/>
+Take a look at the below sped-up video to see how the birds are being trained over generations using the built-in Genetic Algorithm in NEAT Framework.<br/>
+<video src="https://user-images.githubusercontent.com/75234723/169683424-ffd7a329-0870-4328-8289-30d56f5b426d.mp4">
+<br/>
 
-  
 ## AI playing the game
 Now, take a look at the best evolved AI bird playing the game all by itself perfectly.<br/>
-[*Click here to view the best evolved AI Bird play the game*](https://www.youtube.com/watch?v=NecLPV8-MXU&list=PL2-kFUJJfnYCEXIVPzlZN53putIU-oVP2&index=2)
+<video src="https://user-images.githubusercontent.com/75234723/169685656-3e8d9e86-fc4c-458b-9003-37fea9ebcab2.mp4">
 <br/>
 
 ## Open the Project in GitPod
 Simply change the  ***training***  boolean variable in line 12 of  ***flappy_bird.py***  python script to switch between the training and AI Game Play modes.<br/>
 Click the button below to open the project in cloud-based development environment (GitPod).<br/><br/>
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/SaiPrakashGit/FlappyBirdAI/blob/main/flappy_bird.py)<br/>
-<video src="https://user-images.githubusercontent.com/75234723/169683424-ffd7a329-0870-4328-8289-30d56f5b426d.mp4">
