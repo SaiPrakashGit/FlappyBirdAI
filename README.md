@@ -26,4 +26,5 @@ Now, take a look at the best evolved AI bird playing the game all by itself perf
 
 
 ### Open the Project in GitPod
+Simply change the *training* boolean variable in line 12 of *flappy_bird.py* python script to switch between the training and AI Game Play modes.
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/SaiPrakashGit/FlappyBirdAI/blob/main/flappy_bird.py)

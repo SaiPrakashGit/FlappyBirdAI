@@ -8,6 +8,7 @@ import random
 import pickle     # To store the best performed AI bird into file to store it in order to use it later to play the game
 
 GEN = -1
+# Change the training boolean variable here to switch between Training and AI Game Play modes
 training = False
 
 # Initializing font inside game window to draw useful info like score and how many birds are alive at each generation
