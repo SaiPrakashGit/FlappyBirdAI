@@ -23,3 +23,7 @@ Take a look at the video below to see how the birds are being trained using the 
 ## AI playing the game
 Now, take a look at the best evolved AI bird playing the game all by itself perfectly.<br/>
 [*Click here to view the best evolved AI Bird play the game*](https://www.youtube.com/watch?v=NecLPV8-MXU&list=PL2-kFUJJfnYCEXIVPzlZN53putIU-oVP2&index=2)
+
+
+### Open the Project in GitPod
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/SaiPrakashGit/FlappyBirdAI/blob/main/flappy_bird.py)
